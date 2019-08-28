@@ -1,0 +1,67 @@
+到https://github.com/helm/helm/releases下载最新版本的helm
+安装helm客户端
+二进制安装
+tar -zxvf helm-v2.14.3-linux-amd64.tar.gz
+mv linux-amd64/helm /usr/local/bin/helm
+
+vim till-rbac-config.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tiller
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tiller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: tiller
+    namespace: kube-system
+
+kubectl apply -f till-rbac-config.yaml
+helm init --upgrade --service-account tiller  --tiller-image registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.14.3  --stable-repo-url https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
+
+helm version
+kubectl get pod -n kube-system -l app=helm
+
+Helm现在有一个安装程序脚本，可以自动获取最新版本的Helm客户端并在本地安装
+curl -LO https://git.io/get_helm.sh
+chmod 700 get_helm.sh
+./get_helm.sh
+
+安装金丝雀
+helm init --canary-image
+
+升级helm
+helm init --upgrade
+
+删除或重新安装helm
+删除helm
+kubectl delete deployment tiller-deploy --namespace kube-system
+helm reset
+
+helm命令使用
+
+更新使用的默认仓库元数据信息
+helm repo update
+搜索列出
+helm search redis
+打印指定Charts详细信息
+helm inspect stable/redis
+安装
+helm install stable/redis  -n redis　　　　// -n 给个名字
+查看已经安装
+helm list
+删除已经安装的
+helm delete redis
+其他
+helm upgrade
+helm rollback
+helm history
+
